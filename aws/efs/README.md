@@ -38,29 +38,22 @@ If you are new to Kubernetes or to PersistentVolumes this quick start will get y
 
 - Now you can use your PersistentVolume in your pod or deployment by referencing your claim name when it's created.
 
-```
-kind: Pod
-apiVersion: v1
-metadata:
-  name: test-pod
-spec:
-  containers:
-  - name: test-pod
-    image: gcr.io/google_containers/busybox:1.24
-    command:
-      - "/bin/sh"
-    args:
-      - "-c"
-      - "touch /mnt/SUCCESS && exit 0 || exit 1"
-    volumeMounts:
-      - name: efs-pvc
-        mountPath: "/mnt"
-  restartPolicy: "Never"
-  volumes:
-    - name: efs-pvc
-      persistentVolumeClaim:
-        claimName: efs
-```
+  ```
+  kubectl apply -f test-pod.yaml
+  ```
+
+- To ensure that it is working correctly, run the following command.
+
+  ```
+  kubectl logs test-pod
+  ```
+  You will see the following:
+  ```
+  total 8
+  drwxrws--x    2 root     2000          6144 Dec 24 10:34 .
+  drwxr-xr-x    1 root     root            28 Dec 24 10:34 ..
+  -rw-r--r--    1 root     2000             0 Dec 24 10:34 SUCCESS
+  ```
 
 If you scale this pod each additional pod will also be able to read and write the same files. You may also reference the same claimName in another type of pod so your 2 applications can read and write the same files. If you wish to have a second application that uses EFS storage but don't want other pods to access the files, create a new claim using a new name but the same storage class.
 

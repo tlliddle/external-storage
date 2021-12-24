@@ -4,17 +4,20 @@ kind: ConfigMap
 metadata:
   name: efs-provisioner
 data:
-  file.system.id: yourEFSsystemid
-  aws.region: regionyourEFSisin
+  file.system.id: fs-03d07bd1f95f40f11
+  aws.region: us-east-2
   provisioner.name: example.com/aws-efs
-  dns.name: ""
+  dns.name: "fs-03d07bd1f95f40f11.efs.us-east-2.amazonaws.com"
 ---
 kind: Deployment
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 metadata:
   name: efs-provisioner
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: efs-provisioner
   strategy:
     type: Recreate 
   template:
@@ -22,6 +25,7 @@ spec:
       labels:
         app: efs-provisioner
     spec:
+      serviceAccount: efs-provisioner
       containers:
         - name: efs-provisioner
           image: quay.io/external_storage/efs-provisioner:latest
@@ -53,7 +57,7 @@ spec:
       volumes:
         - name: pv-volume
           nfs:
-            server: yourEFSsystemID.efs.yourEFSregion.amazonaws.com
+            server: fs-03d07bd1f95f40f11.efs.us-east-2.amazonaws.com
             path: /
 ---
 kind: StorageClass
